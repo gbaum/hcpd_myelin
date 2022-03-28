@@ -16,17 +16,7 @@ load('/ncf/hcp/data/analyses/myelin/Aug2021_brm_output/Glasser-MMP/regional/post
 ## R graphics settings ##
 #########################
 # Color palettes for plotting
-jpal <- paste0('#', c('3A4965', 'EAE3D8', 'FAF8F2', 'C07D59', 'F99FC9'))
 apal <- paste0('#', c('000000', 'EAE3D8', 'FFFFFF', 'FFD378', '424C6D'))
-
-jftheme <- theme_minimal() +  
-  theme(text = element_text(family = 'Didact Gothic', size = 14),
-        panel.background = element_rect(fill = jpal[[3]], size = 0, color = jpal[[2]]),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), 
-        strip.background = element_rect(fill = jpal[[2]], size = 0),
-        strip.text = element_text(color = '#222222'),
-        axis.text =  element_text(color = jpal[[1]]), axis.title = element_text(color = jpal[[1]]))
 
 gbtheme <- theme_classic() +  
   theme(text = element_text(size = 36),
@@ -53,49 +43,39 @@ write.table(mean_myelin, "/ncf/hcp/data/analyses/myelin/data/n628_Aug2021_newCor
 ## DEFINE REGIONAL SMOOTHS FOR FIGURES ##
 #########################################
 
-## Figure 1 - Methods Schematic
-i <- 1 #Right Area V1 
+##################################
+## Figure 1 - Methods Schematic ##
+##################################
+i <- 188 ## Left Area 4 (motor cortex)
 
 ########################
 ## Figure 3- Bayes R2 ##
 ########################
-i <- 244  #Left ACC, p32
-i <- 4   #Right Area V2
+i <- 244  # Left ACC, p32
+i <- 4   # Right Area V1 
 
 ##########################################
 ## Figure 4 - Annualized Rate of Change ##
 ##########################################
-i <- 249 #Left Medial PFC, 9m  (low)
-i <- 8 #Right Motor cortex, area 4 (high)
-
-###########################################
-## Figure 5 - Age of Peak T1w/T2w Growth ##
-###########################################
-i<- 181 #Left V1 
-i <- 73 #Right PFC 8c
+i <- 249 ## Left Medial PFC, 9m  (low)
+i <- 8 ## Right Motor cortex, area 4 (high)
 
 #####################################################
-## Figure 6 - Nonlinearity (mean second derivative ##
+## Figure 5 - Nonlinearity (mean second derivative ##
 #####################################################
-i<- 263 #Left dlPFC 9-46v
-i <- i #Right V1 
+i <- 184 # Left V2
+i <- 111 # Right AVI (ventral insula)
+
+###########################################
+## Figure 6 - Age of Peak T1w/T2w Growth ##
+###########################################
+i<- 181 # Left V1 
+i <- 73 # Right PFC 8c
 
 
-## Graphical settings:
-# ymin <- 1.1
-# ymax <- 2.3
-
-# ymin <- min(mf_points$data[,1])
-# ymax <- mean(mf_points$data[,1]) + (3*sd(mf_points$data[,1]))
-
-# scale_y_continuous(breaks=c(1.4, 1.8, 2.2), limits=c(ymin, ymax))
-# scale_y_continuous(breaks=c(1.4, 1.6, 1.8), limits=c(ymin, ymax))
-## Graphical settings:
-
-
-#################
-## PLOT SMOOTH ##
-#################
+###########################
+######  PLOT SMOOTH  ######
+###########################
 print(response_vars[[i]])
 
 include_points <- TRUE #overlay points on smooth plots
@@ -142,7 +122,7 @@ print(ggplot(aderivative, aes(x = Age, y = diff_from_max)) +
 cat(paste0('\n\n### Smooth estimate\n\n'))
 
 ## EXPORT PLOT (diff from max)
-ggsave(paste0('/ncf/hcp/data/analyses/myelin/figures/smooths/v', i, '_brm_diffFromMax.png'), width = 12, height = 8, unit="in", dpi=500)
+ggsave(paste0('/ncf/hcp/data/analyses/myelin/figures/smooths/v', i, '_brm_diffFromMax.png'), width = 12, height = 9, unit="in", dpi=500)
 
 
 mf_points <- NULL
@@ -151,7 +131,6 @@ if(include_points){
 }
 
 
-## GB:  M
 #This is where we finally plot the smooth! So it's the correct place to add
 #in the mean of the response. We have to add it to both the line and the ribbon.
 
@@ -170,42 +149,42 @@ print(ggplot(asmooth[aderivative[, .(Age, compared_to_max)], on = 'Age'],
         scale_color_manual(breaks = c('less_steep', 'as_steep'), values = apal[c(4,5)], 
                            labels = c('Less steep', 'As steep'),
                            name = 'Region, as compared \nto maximum derivative, \nis...')) + 
-  gbtheme + # ylim(ymin, ymax)
-  scale_y_continuous(breaks=c(1.6, 1.8, 2.0), limits=c(ymin, ymax))
-  # scale_y_continuous(breaks=c(1.4, 1.6, 1.8, 2.0), limits=c(ymin, ymax))
-  # ylim(ymin, ymax) # + 
-  # scale_y_continuous(breaks=c(1.2, 1.4, 1.6, 1.8 , 2.0, 2.2), limits=c(ymin, ymax))
-
-# Set limits on Y-axis
-# scale_y_continuous(breaks=c(1.6, 2.0, 2.4), limits = c(1.4, 2.4)) + 
-
-# ylim(ymin, ymax)
-
-# ylim(min(mf_points$data[1]), 2.6)
-# scale_y_continuous(limits = c(min(response_vars[[i]], 2.1))) +  
-# gbtheme)
-
-
-## EXPORT PLOT 
-ggsave(paste0('/ncf/hcp/data/analyses/myelin/figures/smooths/v', i, '_brm_smooth_narrow.png'), width = 12, height = 9, unit="in", dpi=500)
-
-###################################
-## Plot the posterior derivative ##
-###################################
-print(ggplot(aderivative, aes(x = Age, y = deriv1)) + 
-        geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 1, fill = apal[2]) +  
-        geom_segment(x = age_at_max_med_deriv, 
-                     xend = age_at_max_med_deriv, 
-                     y = aderivative[Age == age_at_max_med_deriv, lower],
-                     yend = aderivative[Age == age_at_max_med_deriv, upper], color = apal[[1]]) +
-        geom_line() + 
-        geom_line(aes(color = compared_to_max, group = 1), size = 2, alpha = .8) + 
-        geom_point(x = age_at_max_med_deriv, y = aderivative[Age == age_at_max_med_deriv, deriv1], color = apal[[1]], size = 2) +
-        scale_color_manual(breaks = c('less_steep', 'as_steep'), values = apal[c(4,5)], 
-                           labels = c('Less steep', 'As steep'),
-                           name = 'Region, as compared \nto maximum derivative, \nis...') +
-        gbtheme) # + scale_y_continuous(breaks=c(-0.02, 0.0, 0.025)))
-
-
-## EXPORT PLOT 
-ggsave(paste0('/ncf/hcp/data/analyses/myelin/figures/smooths/v', i, '_brm_deriv_narrow.png'), width = 12, height = 9, unit="in", dpi=500)
+    gbtheme + # ylim(ymin, ymax)
+    scale_y_continuous(breaks=c(1.4, 1.6, 1.8, 2.0, 2.2), limits=c(ymin, ymax))
+    # scale_y_continuous(breaks=c(1.4, 1.6, 1.8, 2.0), limits=c(ymin, ymax))
+    # ylim(ymin, ymax) # + 
+    # scale_y_continuous(breaks=c(1.2, 1.4, 1.6, 1.8 , 2.0, 2.2), limits=c(ymin, ymax))
+  
+  # Set limits on Y-axis
+  # scale_y_continuous(breaks=c(1.6, 2.0, 2.4), limits = c(1.4, 2.4)) + 
+  
+  # ylim(ymin, ymax)
+  
+  # ylim(min(mf_points$data[1]), 2.6)
+  # scale_y_continuous(limits = c(min(response_vars[[i]], 2.1))) +  
+  # gbtheme)
+  
+  
+  ## EXPORT PLOT 
+  ggsave(paste0('/ncf/hcp/data/analyses/myelin/figures/smooths/v', i, '_brm_smooth.png'), width = 12, height = 9, unit="in", dpi=500)
+  
+  ###################################
+  ## Plot the posterior derivative ##
+  ###################################
+  print(ggplot(aderivative, aes(x = Age, y = deriv1)) + 
+          geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 1, fill = apal[2]) +  
+          geom_segment(x = age_at_max_med_deriv, 
+                       xend = age_at_max_med_deriv, 
+                       y = aderivative[Age == age_at_max_med_deriv, lower],
+                       yend = aderivative[Age == age_at_max_med_deriv, upper], color = apal[[1]]) +
+          geom_line() + 
+          geom_line(aes(color = compared_to_max, group = 1), size = 2, alpha = .8) + 
+          geom_point(x = age_at_max_med_deriv, y = aderivative[Age == age_at_max_med_deriv, deriv1], color = apal[[1]], size = 2) +
+          scale_color_manual(breaks = c('less_steep', 'as_steep'), values = apal[c(4,5)], 
+                             labels = c('Less steep', 'As steep'),
+                             name = 'Region, as compared \nto maximum derivative, \nis...') +
+          gbtheme) # + scale_y_continuous(breaks=c(-0.02, 0.0, 0.025)))
+  
+  
+  ## EXPORT PLOT 
+  ggsave(paste0('/ncf/hcp/data/analyses/myelin/figures/smooths/v', i, '_brm_deriv.png'), width = 12, height = 9, unit="in", dpi=500)
